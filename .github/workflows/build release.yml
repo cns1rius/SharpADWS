@@ -33,7 +33,7 @@ jobs:
             /p:Platform="AnyCPU" `
             /p:GenerateManifests=true `
             /p:PublishDir="publish\"
-          dir "publish\"
+          dir .
 
       - name: Upload Release assets
         uses: softprops/action-gh-release@v2
