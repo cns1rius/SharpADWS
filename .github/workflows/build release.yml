@@ -1,0 +1,44 @@
+name: Build and Release .NET Framework
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+
+      - name: Restore NuGet packages
+        run: nuget restore SharpADWS.sln
+
+      - name: Build solution (Release)
+        run: msbuild.exe SharpADWS.sln /t:Rebuild /p:Configuration=Release
+
+      - name: Publish exe
+        shell: pwsh
+        run: |
+          msbuild.exe "SharpADWS/SharpADWS.csproj" `
+            /t:Restore,Build,Publish `
+            /p:Configuration=Release `
+            /p:Platform="AnyCPU" `
+            /p:GenerateManifests=true `
+            /p:PublishDir="publish\"
+          dir "publish\"
+
+      - name: Upload Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            publish/SharpADWS.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
